@@ -1,6 +1,6 @@
 package com.bancoseguro.msproductos.expossed;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,12 +14,14 @@ import com.bancoseguro.msproductos.domain.dto.req.ProductReq;
 import com.bancoseguro.msproductos.domain.dto.req.ProductoReq;
 import com.bancoseguro.msproductos.domain.dto.res.ClienteRes;
 import com.bancoseguro.msproductos.domain.dto.res.ProductoRes;
-import com.bancoseguro.msproductos.domain.dto.res.SaldoRes;
+import com.bancoseguro.msproductos.utils.ProductoReglas;
 
+import jakarta.validation.Valid;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
+@Validated
 @RequestMapping("/v1/productos")
 public class ProductosRestService {
 	
@@ -30,15 +32,23 @@ public class ProductosRestService {
         this.webClient = webClientBuilder.build();
     }
 	
-	@GetMapping("/{idProducto}/saldo")
-	public Mono<SaldoRes> getBalance(){
-		return null;
-	}
-	
 	
 	@PostMapping("")
-	public Mono<ProductoRes> postProduct(@RequestBody ProductoReq producto){
-		return null;
+	public Mono<Object> postProduct(@Valid @RequestBody ProductoReq producto){
+		
+		if(ProductoReglas.requiereComision(producto.getTipoProducto()) && !producto.getComision().isPresent()) {
+			return null;
+		}
+		
+		if(ProductoReglas.requiereLimite(producto.getTipoProducto()) && !producto.getMaximoOperacionesMes().isPresent()) {
+			return null;
+		}
+		
+		if(ProductoReglas.requiereMinDiaMes(producto.getTipoProducto()) && !producto.getMinimoDiaMes().isPresent()) {
+			return null;
+		}
+		
+		return Mono.just(producto);
 	}
 	
 	
