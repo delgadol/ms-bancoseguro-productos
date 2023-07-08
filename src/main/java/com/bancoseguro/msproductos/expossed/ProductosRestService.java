@@ -1,5 +1,6 @@
 package com.bancoseguro.msproductos.expossed;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.bancoseguro.msproductos.bussiness.services.ProductosServices;
 import com.bancoseguro.msproductos.domain.dto.req.ProductReq;
 import com.bancoseguro.msproductos.domain.dto.req.ProductoReq;
 import com.bancoseguro.msproductos.domain.dto.res.ClienteRes;
@@ -25,6 +27,8 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/v1/productos")
 public class ProductosRestService {
 	
+	@Autowired
+	private ProductosServices servProd;
 	
 	private final WebClient webClient;
 
@@ -34,7 +38,7 @@ public class ProductosRestService {
 	
 	
 	@PostMapping("")
-	public Mono<Object> postProduct(@Valid @RequestBody ProductoReq producto){
+	public Mono<ProductoRes> postProduct(@Valid @RequestBody ProductoReq producto){
 		
 		if(ProductoReglas.requiereComision(producto.getTipoProducto()) && !producto.getComision().isPresent()) {
 			return null;
@@ -48,7 +52,7 @@ public class ProductosRestService {
 			return null;
 		}
 		
-		return Mono.just(producto);
+		return servProd.postProduct(producto);
 	}
 	
 	

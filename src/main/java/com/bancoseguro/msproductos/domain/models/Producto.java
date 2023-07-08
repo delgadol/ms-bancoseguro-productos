@@ -24,7 +24,7 @@ public class Producto implements Serializable{
 	
 	private GrupoProducto grupoProducto;
 	
-	private TipoProducto tipoProdcuto;
+	private TipoProducto tipoProducto;
 	
 	private String codigoProducto;
 	
