@@ -1,6 +1,7 @@
 package com.bancoseguro.msproductos.domain.dto.res;
 
 import com.bancoseguro.msproductos.utils.GrupoProducto;
+import com.bancoseguro.msproductos.utils.TipoCliente;
 import com.bancoseguro.msproductos.utils.TipoProducto;
 
 import lombok.Data;
@@ -14,9 +15,15 @@ public class ProductoRes {
 	
 	private TipoProducto tipoProducto;
 	
-	private String codigoProducto = "";
+	private String codigoProducto;
 	
-	private String estado = "0";
+	private String estado;
+	
+	private TipoCliente tipoCliente;
+	
+	private Integer maxOperacionesMes;
+	
+	private Integer minDiaMesOperacion ;
 	
 	
 

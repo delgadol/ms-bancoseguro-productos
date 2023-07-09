@@ -14,7 +14,9 @@ import com.bancoseguro.msproductos.domain.dto.res.ClienteRes;
 import com.bancoseguro.msproductos.domain.dto.res.ProductoRes;
 import com.bancoseguro.msproductos.domain.models.Producto;
 import com.bancoseguro.msproductos.domain.models.ProductoOrder;
+import com.bancoseguro.msproductos.domain.models.Saldo;
 import com.bancoseguro.msproductos.domain.repositories.ProductosRepository;
+import com.bancoseguro.msproductos.domain.repositories.SaldoRespository;
 import com.bancoseguro.msproductos.utils.BankFnUtils;
 import com.bancoseguro.msproductos.utils.Constantes;
 import com.bancoseguro.msproductos.utils.ModelMapperUtils;
@@ -29,6 +31,9 @@ public class ProductoServicesImpl implements ProductosServices{
 	
 	@Autowired
 	private ProductosRepository servRepo;
+	
+	@Autowired
+	private SaldoRespository servSaldoRepo;
 	
 	private final WebClient webClient;
 
@@ -79,7 +84,19 @@ public class ProductoServicesImpl implements ProductosServices{
 							.flatMap(s -> {
 								Producto nuevaEntidad = new Producto();
 								nuevaEntidad = ModelMapperUtils.map(orden, Producto.class);
-								return servRepo.save(nuevaEntidad);
+								return servRepo.save(nuevaEntidad)
+										.flatMap(entidad -> {
+											Saldo saldoCero = new Saldo();
+											saldoCero.setCodControl(BankFnUtils.uniqueProductCode());
+											saldoCero.setGrupoProdcuto(entidad.getGrupoProducto());
+											saldoCero.setTipoProducto(entidad.getTipoProducto());
+											saldoCero.setCodigoProducto(entidad.getId());
+											saldoCero.setSaldoActual(0.00D);
+											return servSaldoRepo.save(saldoCero)
+													.flatMap(saldoW ->{
+														return Mono.just(entidad);
+													});
+										});
 							});
 				});
 		return ModelMapperUtils.mapToMono(nuevoProducto, ProductoRes.class);

@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.bancoseguro.msproductos.utils.GrupoProducto;
+import com.bancoseguro.msproductos.utils.TipoCliente;
 import com.bancoseguro.msproductos.utils.TipoProducto;
 
 import lombok.Data;
@@ -32,13 +33,15 @@ public class Producto implements Serializable{
 	
 	private double comision = 0.00D;
 	
-	private Integer maxOperacionesMes = -1;
+	private Integer maxOperacionesMes = Integer.MAX_VALUE;
 	
-	private Integer minDiaMesOperacion = -1;
+	private Integer minDiaMesOperacion = 0;
 	
 	private Integer indEliminado = 0 ;
 	
 	private String estado; 
+	
+	private TipoCliente tipoCliente;
 	
 
 }

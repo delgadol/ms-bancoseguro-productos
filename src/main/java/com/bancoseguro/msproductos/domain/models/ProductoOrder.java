@@ -31,13 +31,13 @@ public class ProductoOrder implements Serializable{
 		
 		private double comision = 0.00D;
 		
-		private Integer maxOperacionesMes = -1;
+		private Integer maxOperacionesMes = Integer.MAX_VALUE;
 		
 		private Integer minDiaMesOperacion = -1;
 		
 		private Integer indEliminado = 0 ;
 		
-		private String estado; 
+		private String estado="0"; 
 		
 		private TipoCliente tipoCliente;
 		
