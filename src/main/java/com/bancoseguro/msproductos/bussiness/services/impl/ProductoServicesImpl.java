@@ -44,7 +44,6 @@ public class ProductoServicesImpl implements ProductosServices{
                 .doOnError(WebClientResponseException.class, e -> {
                     HttpStatus statusCode = (HttpStatus) e.getStatusCode();
                     System.out.println("Error: " + statusCode);
-                    // Manejar el error de acuerdo a tus necesidades
                 });
 	}
 
