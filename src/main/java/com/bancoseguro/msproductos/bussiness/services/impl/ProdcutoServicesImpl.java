@@ -1,14 +1,12 @@
 package com.bancoseguro.msproductos.bussiness.services.impl;
 
-import java.util.function.Consumer;
-import java.util.function.LongConsumer;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.bancoseguro.msproductos.bussiness.services.ProductosServices;
 import com.bancoseguro.msproductos.domain.dto.req.ProductoModReq;
@@ -16,6 +14,8 @@ import com.bancoseguro.msproductos.domain.dto.req.ProductoReq;
 import com.bancoseguro.msproductos.domain.dto.res.ClienteRes;
 import com.bancoseguro.msproductos.domain.dto.res.ProductoRes;
 import com.bancoseguro.msproductos.domain.models.Producto;
+import com.bancoseguro.msproductos.domain.models.ProductoOrder;
+import com.bancoseguro.msproductos.domain.repositories.ProductosRepository;
 import com.bancoseguro.msproductos.utils.BankFnUtils;
 import com.bancoseguro.msproductos.utils.ModelMapperUtils;
 import com.bancoseguro.msproductos.utils.ProductoReglas;
@@ -27,6 +27,8 @@ import reactor.core.publisher.Mono;
 @Transactional
 public class ProdcutoServicesImpl implements ProductosServices{
 	
+	@Autowired
+	private ProductosRepository servRepo;
 	
 	private final WebClient webClient;
 
@@ -48,12 +50,13 @@ public class ProdcutoServicesImpl implements ProductosServices{
 
 	@Override
 	public Mono<ProductoRes> postProduct(ProductoReq producto) {
-		Mono<Producto> nuevoProducto = getClienteApi(producto.getCodigoPersona())
+		Mono<ProductoOrder> ordenProducto = getClienteApi(producto.getCodigoPersona())
 				.flatMap(t->{
-					Producto nuevoProd = new Producto();
+					ProductoOrder nuevoProd = new ProductoOrder();
 					nuevoProd.setGrupoProducto(ProductoReglas.getGrupoProducto(producto.getTipoProducto()));
 					nuevoProd.setTipoProducto(producto.getTipoProducto());
 					nuevoProd.setCodigoPersona(t.getId());
+					nuevoProd.setTipoCliente(t.getTipoCliente());
 					nuevoProd.setCodigoProducto(BankFnUtils.uniqueProductCode());
 					nuevoProd.setEstado("");
 					if(ProductoReglas.requiereComision(producto.getTipoProducto())){
@@ -66,6 +69,19 @@ public class ProdcutoServicesImpl implements ProductosServices{
 						nuevoProd.setMinDiaMesOperacion(producto.getMinimoDiaMes().get());
 					}
 					return Mono.just(nuevoProd);
+				});
+		Mono<Producto> nuevoProducto = ordenProducto
+				.flatMap(orden -> {
+					Mono<Long> countCtrl = servRepo
+							.countByTipoProductoAndCodigoPersonaAndIndEliminado(orden.getTipoProducto(), orden.getCodigoPersona(), orden.getIndEliminado());
+					Integer maxNumCtas = ProductoReglas.getMaxNumProductos(orden.getTipoCliente(), orden.getTipoProducto());
+					return countCtrl
+							.filter(t -> t < maxNumCtas )
+							.flatMap(s -> {
+								Producto nuevaEntidad = new Producto();
+								nuevaEntidad = ModelMapperUtils.map(orden, Producto.class);
+								return servRepo.save(nuevaEntidad);
+							});
 				});
 		return ModelMapperUtils.mapToMono(nuevoProducto, ProductoRes.class);
 	}

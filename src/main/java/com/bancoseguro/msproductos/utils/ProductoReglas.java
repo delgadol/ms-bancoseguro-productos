@@ -3,7 +3,7 @@ package com.bancoseguro.msproductos.utils;
 import java.util.Arrays;
 import java.util.List;
 
-import org.modelmapper.internal.bytebuddy.asm.Advice.OffsetMapping.ForOrigin.Renderer.ForReturnTypeName;
+
 
 public class ProductoReglas {
 	
@@ -36,5 +36,22 @@ public class ProductoReglas {
 	public static boolean requiereMinDiaMes(TipoProducto codProducto) {
 		return (reqMinDiaMes.contains(codProducto));
 	}
+	
+	
+	public static Integer getMaxNumProductos(TipoCliente tipoCliente, TipoProducto tipoProducto) {
+		Integer maxNumProd = Integer.MAX_VALUE;
+		List<TipoProducto> prodPersonaNatural = Arrays.asList(TipoProducto.CTAA,TipoProducto.CTCC,TipoProducto.DPFJ);
+		List<TipoProducto> prodPersonaEmpresa = Arrays.asList(TipoProducto.CTAA,TipoProducto.DPFJ);
+		if (tipoCliente == TipoCliente.PERSONAL && prodPersonaNatural.contains(tipoProducto)) {
+			maxNumProd = 1;
+		}
+		
+		if (tipoCliente == TipoCliente.EMPRESARIAL && prodPersonaEmpresa.contains(tipoProducto)) {
+			maxNumProd = 0;
+		}		
+		
+		return maxNumProd;
+	}
+	
 
 }
