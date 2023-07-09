@@ -9,7 +9,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.bancoseguro.msproductos.bussiness.services.ProductosServices;
-import com.bancoseguro.msproductos.domain.dto.req.ProductoModReq;
 import com.bancoseguro.msproductos.domain.dto.req.ProductoReq;
 import com.bancoseguro.msproductos.domain.dto.res.ClienteRes;
 import com.bancoseguro.msproductos.domain.dto.res.ProductoRes;
@@ -17,6 +16,7 @@ import com.bancoseguro.msproductos.domain.models.Producto;
 import com.bancoseguro.msproductos.domain.models.ProductoOrder;
 import com.bancoseguro.msproductos.domain.repositories.ProductosRepository;
 import com.bancoseguro.msproductos.utils.BankFnUtils;
+import com.bancoseguro.msproductos.utils.Constantes;
 import com.bancoseguro.msproductos.utils.ModelMapperUtils;
 import com.bancoseguro.msproductos.utils.ProductoReglas;
 
@@ -25,14 +25,14 @@ import reactor.core.publisher.Mono;
 
 @Service
 @Transactional
-public class ProdcutoServicesImpl implements ProductosServices{
+public class ProductoServicesImpl implements ProductosServices{
 	
 	@Autowired
 	private ProductosRepository servRepo;
 	
 	private final WebClient webClient;
 
-    public ProdcutoServicesImpl(WebClient.Builder webClientBuilder) {
+    public ProductoServicesImpl(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.build();
     }
 	
@@ -87,33 +87,56 @@ public class ProdcutoServicesImpl implements ProductosServices{
 	}
 
 	@Override
-	public Mono<ProductoRes> putProduct(ProductoModReq producto) {
-		// TODO Auto-generated method stub
-		return null;
+	public Mono<ProductoRes> putProduct(String idProducto, ProductoReq producto) {
+		return getClienteApi(producto.getCodigoPersona())
+				.flatMap(cliente->{					
+					return servRepo.findFirstByIdAndIndEliminado(idProducto, Constantes.NO_ELIMINADO)
+							.filter(pv1 -> pv1.getEstado().equalsIgnoreCase(Constantes.ESTADO_NORMAL))
+							.filter(pv2 -> pv2.getCodigoPersona().equalsIgnoreCase(producto.getCodigoPersona()))
+							.flatMap(fProd -> {
+								Producto modProducto = new Producto();
+								modProducto = ModelMapperUtils.map(fProd, Producto.class);
+								if(ProductoReglas.requiereComision(producto.getTipoProducto())){
+									modProducto.setComision(producto.getComision().get());
+								}
+								if(ProductoReglas.requiereLimite(producto.getTipoProducto())) {
+									modProducto.setMaxOperacionesMes(producto.getMaximoOperacionesMes().get());
+								}
+								if(ProductoReglas.requiereMinDiaMes(producto.getTipoProducto())) {
+									modProducto.setMinDiaMesOperacion(producto.getMinimoDiaMes().get());
+								}
+								return ModelMapperUtils.mapToMono(servRepo.save( modProducto), ProductoRes.class);
+							});
+				});
 	}
 
 	@Override
-	public Mono<ProductoRes> getProductById(String IdProduct) {
-		// TODO Auto-generated method stub
-		return null;
+	public Mono<ProductoRes> getProductById(String idProduct) {
+		return servRepo.findFirstByIdAndIndEliminado(idProduct, Constantes.NO_ELIMINADO)
+				.flatMap( producto -> {
+					return Mono.just(ModelMapperUtils.map(producto,ProductoRes.class));
+				});
 	}
 
 	@Override
 	public Flux<ProductoRes> getAllProductByClientId(String idClient) {
-		// TODO Auto-generated method stub
-		return null;
+		return servRepo.findAllByCodigoPersonaAndIndEliminado(idClient, Constantes.NO_ELIMINADO)
+				.flatMap( data -> {
+					return Flux.just(ModelMapperUtils.map(data, ProductoRes.class));
+				});
 	}
 
-	@Override
-	public Mono<ProductoRes> putProductoState(String estado) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
-	public Mono<ProductoRes> delProductById(String IdProduct) {
-		// TODO Auto-generated method stub
-		return null;
+	public Mono<ProductoRes> delProductById(String idProducto) {
+		return servRepo.findFirstByIdAndIndEliminado(idProducto, Constantes.NO_ELIMINADO)
+				.filter(pv1 -> pv1.getEstado().equalsIgnoreCase(Constantes.ESTADO_NORMAL))
+				.flatMap(fProd -> {
+					Producto modProducto = new Producto();
+					modProducto = ModelMapperUtils.map(fProd, Producto.class);
+					modProducto.setIndEliminado(Constantes.ELIMINADO);
+					return ModelMapperUtils.mapToMono(servRepo.save( modProducto), ProductoRes.class);
+				});
 	}
 
 }

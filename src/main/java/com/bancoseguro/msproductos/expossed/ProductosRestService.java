@@ -2,6 +2,7 @@ package com.bancoseguro.msproductos.expossed;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,12 +10,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import com.bancoseguro.msproductos.bussiness.services.ProductosServices;
-import com.bancoseguro.msproductos.domain.dto.req.ProductReq;
 import com.bancoseguro.msproductos.domain.dto.req.ProductoReq;
-import com.bancoseguro.msproductos.domain.dto.res.ClienteRes;
 import com.bancoseguro.msproductos.domain.dto.res.ProductoRes;
 import com.bancoseguro.msproductos.utils.ProductoReglas;
 
@@ -30,11 +28,6 @@ public class ProductosRestService {
 	@Autowired
 	private ProductosServices servProd;
 	
-	private final WebClient webClient;
-
-    public ProductosRestService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.build();
-    }
 	
 	
 	@PostMapping("")
@@ -56,32 +49,40 @@ public class ProductosRestService {
 	}
 	
 	
-	@GetMapping("/{idProduto}")
+	@GetMapping("/{idProducto}")
 	public Mono<ProductoRes> getProductById(@PathVariable(name="idProducto") String idProducto){
-		return null;
+		return servProd.getProductById(idProducto);
 	}
 	
 	
 	@GetMapping("/{idPersona}/cliente")
 	public Flux<ProductoRes> getAllProductByClient(@PathVariable(name="idPersona") String idPErsona){
-		return null;
+		return servProd.getAllProductByClientId(idPErsona);
 	}
 	
 	
 	@PutMapping("/{idProducto}")
-	public Mono<ProductoRes> putProductById(@RequestBody ProductReq producto , @PathVariable(name="idProducto") String idProducto){
-		return null;
+	public Mono<ProductoRes> putProductById(@RequestBody ProductoReq producto , @PathVariable(name="idProducto") String idProducto){
+		if(ProductoReglas.requiereComision(producto.getTipoProducto()) && !producto.getComision().isPresent()) {
+			return null;
+		}
+		
+		if(ProductoReglas.requiereLimite(producto.getTipoProducto()) && !producto.getMaximoOperacionesMes().isPresent()) {
+			return null;
+		}
+		
+		if(ProductoReglas.requiereMinDiaMes(producto.getTipoProducto()) && !producto.getMinimoDiaMes().isPresent()) {
+			return null;
+		}
+		
+		return servProd.putProduct(idProducto,producto);
 	}
 	
-	
-	@GetMapping("/{idCliente}/info")
-	public Mono<ClienteRes> getClienteInfo(@PathVariable(name="idCliente") String idCliente){
-		return webClient.get()
-                .uri(String.format("http://localhost:8085/v1/clientes/%s", idCliente))
-                .retrieve()
-                .bodyToMono(ClienteRes.class);
+	@DeleteMapping("/{idProducto}")
+	public Mono<ProductoRes> delProductById(@PathVariable(name="idProducto") String idProducto){
+		return servProd.delProductById(idProducto);
 	}
-	
+		
 	
 
 }
