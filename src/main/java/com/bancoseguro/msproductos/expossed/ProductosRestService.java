@@ -1,6 +1,7 @@
 package com.bancoseguro.msproductos.expossed;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.bancoseguro.msproductos.bussiness.services.ProductosServices;
 import com.bancoseguro.msproductos.domain.dto.req.ProductoReq;
@@ -52,7 +54,8 @@ public class ProductosRestService {
 			return null;
 		}
 		
-		return servProd.postProduct(producto);
+		return servProd.postProduct(producto)
+				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entidad no procesable")));
 	}
 	
 	/**
@@ -63,7 +66,8 @@ public class ProductosRestService {
 	 */
 	@GetMapping("/{idProducto}")
 	public Mono<ProductoRes> getProductById(@PathVariable(name="idProducto") String idProducto){
-		return servProd.getProductById(idProducto);
+		return servProd.getProductById(idProducto)
+				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entidad no procesable")));
 	}
 	
 	/**
@@ -74,7 +78,8 @@ public class ProductosRestService {
 	 */
 	@GetMapping("/{idPersona}/cliente")
 	public Flux<ProductoRes> getAllProductByClient(@PathVariable(name="idPersona") String idPErsona){
-		return servProd.getAllProductByClientId(idPErsona);
+		return servProd.getAllProductByClientId(idPErsona)
+				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entidad no procesable")));
 	}
 	
 	/**
@@ -99,7 +104,8 @@ public class ProductosRestService {
 			return null;
 		}
 		
-		return servProd.putProduct(idProducto,producto);
+		return servProd.putProduct(idProducto,producto)
+				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entidad no procesable")));
 	}
 	
 	/**
@@ -114,6 +120,7 @@ public class ProductosRestService {
 	}
 	
 	/**
+				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entidad no procesable")));
 	 * Obtiene un Producto y los Codigos Personas y Roles dentro de la cuenta.
 	 *
 	 * @param idProducto el identificador del producto a consultar
@@ -121,7 +128,8 @@ public class ProductosRestService {
 	 */
 	@GetMapping("/{idProducto}/personas")
 	public Mono<ProuctoRolesRes> getPersonaRolesByProductId(@PathVariable(name="idProducto") String idProducto){
-		return servProd.getPersonaRolesByProductId(idProducto);
+		return servProd.getPersonaRolesByProductId(idProducto)
+				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entidad no procesable")));
 	}
 	
 	
@@ -135,7 +143,8 @@ public class ProductosRestService {
 	 */	
 	@DeleteMapping("/{idProducto}/personas/{idPersona}")
 	public Mono<ProuctoRolesRes> delPersonaRolesByProductIdAndCodePersona(@PathVariable(name="idProducto") String idProducto, @PathVariable(name="idPersona") String codePersona){
-		return servProd.delPersonaRolesByProductIdAndCodePersona(idProducto, codePersona);
+		return servProd.delPersonaRolesByProductIdAndCodePersona(idProducto, codePersona)
+				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entidad no procesable")));
 	}
 	
 	/**
@@ -148,7 +157,8 @@ public class ProductosRestService {
 	 */	
 	@PostMapping("/{idProducto}/personas")
 	public Mono<ProuctoRolesRes> postPersonaRolesByProductIdAndRolePersona(@PathVariable(name="idProducto") String idProducto, @Valid @RequestBody PersonaRoles personaRol){
-		return servProd.addPersonaRolesByProductIdAndRolePersona(idProducto, personaRol);
+		return servProd.addPersonaRolesByProductIdAndRolePersona(idProducto, personaRol)
+				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entidad no procesable")));
 	}
 
 }
