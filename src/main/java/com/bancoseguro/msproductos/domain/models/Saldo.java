@@ -17,6 +17,8 @@ public class Saldo {
 	
 	private String codControl;
 	
+	private String idPersona;
+	
 	private GrupoProducto grupoProdcuto;
 	
 	private TipoProducto tipoProducto;

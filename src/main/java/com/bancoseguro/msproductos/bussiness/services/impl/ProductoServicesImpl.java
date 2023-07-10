@@ -92,6 +92,7 @@ public class ProductoServicesImpl implements ProductosServices{
 											saldoCero.setTipoProducto(entidad.getTipoProducto());
 											saldoCero.setCodigoProducto(entidad.getId());
 											saldoCero.setSaldoActual(0.00D);
+											saldoCero.setIdPersona(entidad.getCodigoPersona());
 											return servSaldoRepo.save(saldoCero)
 													.flatMap(saldoW ->{
 														return Mono.just(entidad);
