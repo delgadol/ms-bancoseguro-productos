@@ -52,6 +52,11 @@ public class ProductoServicesImpl implements ProductosServices{
                 });
 	}
 
+	/**
+	* Crea un nuevo producto con la información proporcionada.
+	* @param producto la información del producto a crear
+	* @return un Mono que emite el objeto ProductoRes resultante
+	*/
 	@Override
 	public Mono<ProductoRes> postProduct(ProductoReq producto) {
 		Mono<ProductoOrder> ordenProducto = getClienteApi(producto.getCodigoPersona())
@@ -103,6 +108,12 @@ public class ProductoServicesImpl implements ProductosServices{
 		return ModelMapperUtils.mapToMono(nuevoProducto, ProductoRes.class);
 	}
 
+	/**
+	* Actualiza un producto existente con la información proporcionada.
+	* @param idProducto el identificador del producto a actualizar
+	* @param producto la información actualizada del producto
+	* @return un Mono que emite el objeto ProductoRes resultante
+	*/
 	@Override
 	public Mono<ProductoRes> putProduct(String idProducto, ProductoReq producto) {
 		return getClienteApi(producto.getCodigoPersona())
@@ -135,6 +146,12 @@ public class ProductoServicesImpl implements ProductosServices{
 				});
 	}
 
+	/**
+	 * Obtiene un producto por su identificador.
+	 *
+	 * @param idProduct el identificador del producto
+	 * @return un Mono que emite el objeto ProductoRes correspondiente al ID proporcionado
+	 */
 	@Override
 	public Flux<ProductoRes> getAllProductByClientId(String idClient) {
 		return servRepo.findAllByCodigoPersonaAndIndEliminado(idClient, Constantes.NO_ELIMINADO)
@@ -143,6 +160,12 @@ public class ProductoServicesImpl implements ProductosServices{
 				});
 	}
 
+	/**
+	 * Elimina un producto por su identificador.
+	 *
+	 * @param idProducto el identificador del producto a eliminar
+	 * @return un Mono que emite el objeto ProductoRes correspondiente al producto eliminado
+	 */
 
 	@Override
 	public Mono<ProductoRes> delProductById(String idProducto) {

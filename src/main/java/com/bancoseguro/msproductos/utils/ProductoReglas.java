@@ -4,7 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 
 
-
+/**
+ * Representa las reglas de negocio relacionadas a un producto.
+ * La clase ProductoReglas contiene la lógica y las reglas específicas para un producto.
+ */
 public class ProductoReglas {
 	
 	

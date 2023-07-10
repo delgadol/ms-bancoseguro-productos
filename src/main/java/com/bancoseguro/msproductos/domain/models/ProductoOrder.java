@@ -10,6 +10,10 @@ import com.bancoseguro.msproductos.utils.TipoProducto;
 
 import lombok.Data;
 
+/**
+ * Representa un producto en una orden.
+ * La clase ProductoOrder es una clase de datos que representa la información de un producto en el contexto de una orden.
+ */
 @Data
 public class ProductoOrder implements Serializable{
 

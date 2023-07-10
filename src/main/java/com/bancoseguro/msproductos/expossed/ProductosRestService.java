@@ -29,7 +29,12 @@ public class ProductosRestService {
 	private ProductosServices servProd;
 	
 	
-	
+	/**
+	 * Crea un nuevo producto con la información proporcionada.
+	 *
+	 * @param producto la información del producto a crear
+	 * @return un Mono que emite el objeto ProductoRes resultante
+	 */
 	@PostMapping("")
 	public Mono<ProductoRes> postProduct(@Valid @RequestBody ProductoReq producto){
 		
@@ -48,19 +53,36 @@ public class ProductosRestService {
 		return servProd.postProduct(producto);
 	}
 	
-	
+	/**
+	 * Obtiene un producto por su identificador.
+	 *
+	 * @param idProducto el identificador del producto
+	 * @return un Mono que emite el objeto ProductoRes correspondiente al ID proporcionado
+	 */
 	@GetMapping("/{idProducto}")
 	public Mono<ProductoRes> getProductById(@PathVariable(name="idProducto") String idProducto){
 		return servProd.getProductById(idProducto);
 	}
 	
-	
+	/**
+	 * Obtiene todos los productos asociados a un cliente específico.
+	 *
+	 * @param idPersona el identificador de la persona (cliente)
+	 * @return un Flux que emite objetos ProductoRes relacionados al cliente
+	 */
 	@GetMapping("/{idPersona}/cliente")
 	public Flux<ProductoRes> getAllProductByClient(@PathVariable(name="idPersona") String idPErsona){
 		return servProd.getAllProductByClientId(idPErsona);
 	}
 	
-	
+	/**
+	 * Actualiza un producto por su identificador.
+	 *
+	 * @param producto la información actualizada del producto
+	 * @param idProducto el identificador del producto a actualizar
+	 * @return un Mono que emite el objeto ProductoRes resultante
+	 */
+
 	@PutMapping("/{idProducto}")
 	public Mono<ProductoRes> putProductById(@RequestBody ProductoReq producto , @PathVariable(name="idProducto") String idProducto){
 		if(ProductoReglas.requiereComision(producto.getTipoProducto()) && !producto.getComision().isPresent()) {
@@ -78,6 +100,13 @@ public class ProductosRestService {
 		return servProd.putProduct(idProducto,producto);
 	}
 	
+	/**
+	 * Elimina un producto por su identificador.
+	 *
+	 * @param idProducto el identificador del producto a eliminar
+	 * @return un Mono que emite el objeto ProductoRes correspondiente al producto eliminado
+	 */
+
 	@DeleteMapping("/{idProducto}")
 	public Mono<ProductoRes> delProductById(@PathVariable(name="idProducto") String idProducto){
 		return servProd.delProductById(idProducto);

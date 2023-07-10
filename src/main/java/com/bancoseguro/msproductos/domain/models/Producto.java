@@ -11,6 +11,10 @@ import com.bancoseguro.msproductos.utils.TipoProducto;
 
 import lombok.Data;
 
+/**
+ * Representa un producto.
+ * La clase Producto es una entidad que se mapea a la colección "productos" en la base de datos.
+ */
 @Document(collection = "productos")
 @Data
 public class Producto implements Serializable{

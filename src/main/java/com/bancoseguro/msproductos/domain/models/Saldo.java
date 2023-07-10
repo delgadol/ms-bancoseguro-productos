@@ -7,7 +7,10 @@ import com.bancoseguro.msproductos.utils.GrupoProducto;
 import com.bancoseguro.msproductos.utils.TipoProducto;
 
 import lombok.Data;
-
+/**
+ * Representa el saldo de una entidad.
+ * La clase Saldo es una entidad que se mapea a la colección "saldos" en la base de datos.
+ */
 @Document(collection = "saldos")
 @Data
 public class Saldo {
