@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bancoseguro.msproductos.bussiness.services.ProductosServices;
 import com.bancoseguro.msproductos.domain.dto.req.ProductoReq;
 import com.bancoseguro.msproductos.domain.dto.res.ProductoRes;
+import com.bancoseguro.msproductos.domain.dto.res.ProuctoRolesRes;
+import com.bancoseguro.msproductos.domain.models.PersonaRoles;
 import com.bancoseguro.msproductos.utils.ProductoReglas;
 
 import jakarta.validation.Valid;
@@ -106,12 +108,47 @@ public class ProductosRestService {
 	 * @param idProducto el identificador del producto a eliminar
 	 * @return un Mono que emite el objeto ProductoRes correspondiente al producto eliminado
 	 */
-
 	@DeleteMapping("/{idProducto}")
 	public Mono<ProductoRes> delProductById(@PathVariable(name="idProducto") String idProducto){
 		return servProd.delProductById(idProducto);
 	}
-		
 	
+	/**
+	 * Obtiene un Producto y los Codigos Personas y Roles dentro de la cuenta.
+	 *
+	 * @param idProducto el identificador del producto a consultar
+	 * @return un Mono que emite el objeto ProductoRes correspondiente al producto
+	 */
+	@GetMapping("/{idProducto}/personas")
+	public Mono<ProuctoRolesRes> getPersonaRolesByProductId(@PathVariable(name="idProducto") String idProducto){
+		return servProd.getPersonaRolesByProductId(idProducto);
+	}
+	
+	
+	/**
+	 * Obtiene un Producto y los Codigos Personas y Roles dentro de la cuenta.
+	 * Luego de Eliminar una Persona
+	 *
+	 * @param idProducto el identificador del producto a modificar
+	 * @param codePersona el identificador cliente a eliminar
+	 * @return un Mono que emite el objeto ProductoRes correspondiente al producto modificado
+	 */	
+	@DeleteMapping("/{idProducto}/personas/{idPersona}")
+	public Mono<ProuctoRolesRes> delPersonaRolesByProductIdAndCodePersona(@PathVariable(name="idProducto") String idProducto, @PathVariable(name="idPersona") String codePersona){
+		return servProd.delPersonaRolesByProductIdAndCodePersona(idProducto, codePersona);
+	}
+	
+	/**
+	 * Obtiene un Producto y los Codigos Personas y Roles dentro de la cuenta.
+	 * Luego de Adicionar a una persona
+	 *
+	 * @param idProducto el identificador del producto a modificar
+	 * @param PersonaRoles el objeto de la persona Roles a adicionar
+	 * @return un Mono que emite el objeto ProductoRes correspondiente al producto modificado
+	 */	
+	@PostMapping("/{idProducto}/personas")
+	public Mono<ProuctoRolesRes> postPersonaRolesByProductIdAndRolePersona(@PathVariable(name="idProducto") String idProducto, @Valid @RequestBody PersonaRoles personaRol){
+		return servProd.addPersonaRolesByProductIdAndRolePersona(idProducto, personaRol);
+	}
 
 }

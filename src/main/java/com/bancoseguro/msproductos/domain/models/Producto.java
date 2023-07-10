@@ -1,6 +1,8 @@
 package com.bancoseguro.msproductos.domain.models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -43,9 +45,11 @@ public class Producto implements Serializable{
 	
 	private Integer indEliminado = 0 ;
 	
-	private String estado; 
+	private String estado = "0"; 
 	
 	private TipoCliente tipoCliente;
+	
+	private List<PersonaRoles> personaRoles = new ArrayList<>();
 	
 
 }

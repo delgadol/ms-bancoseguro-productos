@@ -1,6 +1,8 @@
 package com.bancoseguro.msproductos.domain.models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 
@@ -44,6 +46,9 @@ public class ProductoOrder implements Serializable{
 		private String estado="0"; 
 		
 		private TipoCliente tipoCliente;
+		
+		private List<PersonaRoles> personaRoles = new ArrayList<>();
+		
 		
 
 

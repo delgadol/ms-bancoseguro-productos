@@ -1,6 +1,8 @@
 package com.bancoseguro.msproductos.bussiness.services.impl;
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import com.bancoseguro.msproductos.bussiness.services.ProductosServices;
 import com.bancoseguro.msproductos.domain.dto.req.ProductoReq;
 import com.bancoseguro.msproductos.domain.dto.res.ClienteRes;
 import com.bancoseguro.msproductos.domain.dto.res.ProductoRes;
+import com.bancoseguro.msproductos.domain.dto.res.ProuctoRolesRes;
+import com.bancoseguro.msproductos.domain.models.PersonaRoles;
 import com.bancoseguro.msproductos.domain.models.Producto;
 import com.bancoseguro.msproductos.domain.models.ProductoOrder;
 import com.bancoseguro.msproductos.domain.models.Saldo;
@@ -19,8 +23,10 @@ import com.bancoseguro.msproductos.domain.repositories.ProductosRepository;
 import com.bancoseguro.msproductos.domain.repositories.SaldoRespository;
 import com.bancoseguro.msproductos.utils.BankFnUtils;
 import com.bancoseguro.msproductos.utils.Constantes;
+import com.bancoseguro.msproductos.utils.GrupoProducto;
 import com.bancoseguro.msproductos.utils.ModelMapperUtils;
 import com.bancoseguro.msproductos.utils.ProductoReglas;
+import com.bancoseguro.msproductos.utils.TipoCliente;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -178,5 +184,69 @@ public class ProductoServicesImpl implements ProductosServices{
 					return ModelMapperUtils.mapToMono(servRepo.save( modProducto), ProductoRes.class);
 				});
 	}
+	
+	/**
+	 * Obtiene un Producto y los Codigos Personas y Roles dentro de la cuenta.
+	 *
+	 * @param idProducto el identificador del producto a consultar
+	 * @return un Mono que emite el objeto ProductoRes correspondiente al producto
+	 */
+	public Mono<ProuctoRolesRes> getPersonaRolesByProductId(String idProducto){
+		return servRepo.findFirstByIdAndIndEliminado(idProducto, Constantes.NO_ELIMINADO)
+				.filter(pv1 -> pv1.getEstado().equalsIgnoreCase(Constantes.ESTADO_NORMAL))
+				.flatMap(fProd -> {
+					return Mono.just(ModelMapperUtils.map(fProd, ProuctoRolesRes.class));
+				});
+	}
+	
+	/**
+	 * Obtiene un Producto y los Codigos Personas y Roles dentro de la cuenta.
+	 * Luego de Eliminar una Persona
+	 *
+	 * @param idProducto el identificador del producto a modificar
+	 * @param codePersona el identificador cliente a eliminar
+	 * @return un Mono que emite el objeto ProductoRes correspondiente al producto modificado
+	 */	
+	public Mono<ProuctoRolesRes> delPersonaRolesByProductIdAndCodePersona(String idProducto, String codePersona){
+		return servRepo.findFirstByIdAndIndEliminado(idProducto, Constantes.NO_ELIMINADO)
+				.filter(pv1 -> pv1.getEstado().equalsIgnoreCase(Constantes.ESTADO_NORMAL))
+				.flatMap(fProd -> {
+					Producto modProducto = new Producto();
+					modProducto = ModelMapperUtils.map(fProd, Producto.class);
+					List<PersonaRoles> nuevoPersonaRoles = modProducto.getPersonaRoles()
+							.stream()
+							.filter( x -> !x.getCodigoPersona().equals(codePersona))
+							.toList();
+					modProducto.setPersonaRoles(nuevoPersonaRoles);
+					return ModelMapperUtils.mapToMono(servRepo.save( modProducto), ProuctoRolesRes.class);					
+				});
+	}
+	
+	/**
+	 * Obtiene un Producto y los Codigos Personas y Roles dentro de la cuenta.
+	 * Luego de Adicionar a una persona
+	 *
+	 * @param idProducto el identificador del producto a modificar
+	 * @param PersonaRoles el objeto de la persona Roles a adicionar
+	 * @return un Mono que emite el objeto ProductoRes correspondiente al producto modificado
+	 */	
+	public Mono<ProuctoRolesRes> addPersonaRolesByProductIdAndRolePersona(String idProducto, PersonaRoles personaRol){
+		return servRepo.findFirstByIdAndIndEliminado(idProducto, Constantes.NO_ELIMINADO)
+				.filter(pv1 -> pv1.getEstado().equalsIgnoreCase(Constantes.ESTADO_NORMAL))
+				.flatMap(fProd -> {
+					Producto modProducto = new Producto();
+					modProducto = ModelMapperUtils.map(fProd, Producto.class);
+					int existePersona = modProducto.getPersonaRoles()
+							.stream()
+							.filter( x -> x.getCodigoPersona().equals(personaRol.getCodigoPersona()))
+							.toList()
+							.size();
+					if (existePersona == 0 && modProducto.getTipoCliente().equals(TipoCliente.EMPRESARIAL) && modProducto.getGrupoProducto().equals(GrupoProducto.PASIVOS)) {
+						modProducto.getPersonaRoles().add(personaRol);
+					}
+					return ModelMapperUtils.mapToMono(servRepo.save( modProducto), ProuctoRolesRes.class);					
+				});
+	}
+	
 
 }
